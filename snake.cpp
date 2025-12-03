@@ -33,7 +33,9 @@ void CSnake::paint(){
 bool CSnake::handleEvent(int key){
 	if(key==KEY_UP || key==KEY_DOWN || key==KEY_LEFT || key==KEY_RIGHT) return CFramedWindow::handleEvent(key);
 	if(key=='r'){
-		
+		stan=RESUME;
+	} else if(key=='p'){
+		stan=PAUSE;
 	}
 	return false;
 }

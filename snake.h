@@ -17,6 +17,7 @@ CPoint food;
 std::vector<CPoint> snake;
 int points;
 int time;
+bool is_end;
 
 void reset_game();
 void move_snake();

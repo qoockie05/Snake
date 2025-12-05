@@ -1,9 +1,11 @@
 #include "snake.h"
 #include "screen.h"
+ 
 CSnake::CSnake(CRect r, char _c /*=' '*/):
   CFramedWindow(r, _c)
 {
 	stan = HELP;
+	
 }
 
 void CSnake::paint(){
@@ -30,12 +32,15 @@ void CSnake::paint(){
 	} else if(stan==RESUME){
 		gotoyx(y,x+1);
 		printl("POINTS: %d",points);
-		for(size_t i=0;i < snake.size();i++){
+		
+		gotoyx(y+snake[0].y,x+snake[0].x);
+		printc('*');
+		for(size_t i=1;i < snake.size();i++){
 			gotoyx(y+snake[i].y,x+snake[i].x);
-			printc('*');
+			printc('+');
 			}
-		gotoyx(y+food.y,x+food.x);
-		printc('o');
+			gotoyx(y+food.y,x+food.x);
+			printc('o');
 		}
 	
 }
@@ -94,24 +99,25 @@ void CSnake::reset_game(){
 	snake.push_back(CPoint(3,5));
 	
 	direction = CPoint(1,0);
-	
-	points = 0;
 	place_food();
+	points = 0;
+	
 	
 }
 void CSnake::place_food(){
 	int height_size=geom.size.y - 2;
 	int width_size=geom.size.x - 2;
-	
-	bool end=false;
-	while(!end){
-		end=true;
+	int x=geom.topleft.x+1;
+	int y=geom.topleft.y+1;
+	is_end=false;
+	while(!is_end){
+		is_end=true;
 		food.x=(rand() % width_size) + 1;
 		food.y=(rand() % height_size) + 1;
 		
 		for(size_t i=0;i < snake.size();i++){
 			if(snake[i].x==food.x && snake[i].y==food.y){
-				end=false;
+				is_end=false;
 				break;
 			}
 		}
@@ -132,6 +138,13 @@ void CSnake::move_snake(){
 	if(position.y<1){ position.y = height_size; }
 	else if (position.y > height_size){ position.y = 1; }
 	
-	snake.insert(snake.begin(),position);
-	snake.pop_back(); //do usuniecia
+	if(position.x==food.x && position.y==food.y){
+		snake.insert(snake.begin(),position);
+		points++;
+		place_food();
+		snake.push_back('*');
+	} else{
+		snake.insert(snake.begin(),position);
+		snake.pop_back(); //do usuniecia
+	}
 }

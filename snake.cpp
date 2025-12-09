@@ -1,6 +1,6 @@
 #include "snake.h"
 #include "screen.h"
- 
+#define NumberOfLevels 10
 CSnake::CSnake(CRect r, char _c /*=' '*/):
   CFramedWindow(r, _c)
 {
@@ -16,22 +16,32 @@ void CSnake::paint(){
 		gotoyx(y,x);
 		printl("SNAKE");
 		gotoyx(y+1,x);
-		printl("r - resume");
+		printl("r - restart");
 		gotoyx(y+2,x);
 		printl("p - pause");
 		gotoyx(y+3,x);
 		printl("h - hide instructions");
 		gotoyx(y+4,x);
 		printl("Arrows: move snake with arrows.");
-
-		
 	} else if(stan==PAUSE){
+		
+		gotoyx(y+snake[0].y,x+snake[0].x);
+			printc('*');
+			for(size_t i=1;i < snake.size();i++){
+				gotoyx(y+snake[i].y,x+snake[i].x);
+				printc('+');
+			}
+		gotoyx(y,x+1);
+		printl("LEVEL: %d",NumberOfLevels-level);
 		gotoyx(y+7,x+15);
 		printl("PAUSED");
+		gotoyx(y+8,x+15);
+		printl("To resume enter: p");
 		
-	} else if(stan==RESUME){
+	} else if(stan==RESTART){
 		gotoyx(y,x+1);
-		printl("POINTS: %d",points);
+		printl("LEVEL: %d",NumberOfLevels-level);
+		
 		
 		gotoyx(y+snake[0].y,x+snake[0].x);
 		printc('*');
@@ -41,14 +51,43 @@ void CSnake::paint(){
 			}
 			gotoyx(y+food.y,x+food.x);
 			printc('o');
+	} else if(stan==END){
+			
+			gotoyx(y+snake[0].y,x+snake[0].x);
+			printc('*');
+			for(size_t i=1;i < snake.size();i++){
+				gotoyx(y+snake[i].y,x+snake[i].x);
+				printc('+');
+			}
+			
+			gotoyx(y+1,x);
+			printl("GAME OVER");
+			gotoyx(y+2,x);
+			printl("POINTS: %d",points);
+	} else if(stan==RESUME){
+			gotoyx(y,x+1);
+			printl("LEVEL: %d",NumberOfLevels-level);
+			gotoyx(y+snake[0].y,x+snake[0].x);
+			printc('*');
+			for(size_t i=1;i < snake.size();i++){
+				gotoyx(y+snake[i].y,x+snake[i].x);
+				printc('+');
+				}
+			gotoyx(y+food.y,x+food.x);
+			printc('o');
+			}
 		}
 	
-}
+
 bool CSnake::handleEvent(int key){
-	if((stan==PAUSE || stan==HELP) && (key==KEY_UP || key==KEY_DOWN || key==KEY_LEFT || key==KEY_RIGHT)) {
+	if((stan==PAUSE || stan==HELP || stan==END) && (key != 'p' && key != 'h' && key != 'r' && key != -1)) {
 		return CFramedWindow::handleEvent(key);
 	}
-	if(key=='p'){
+	if(key=='p' && stan==PAUSE){
+		stan=RESUME;
+		return true;
+	}
+	if(key=='p' && (stan==RESTART || stan==RESUME)){
 		stan=PAUSE;
 		return true;
 	}
@@ -58,41 +97,42 @@ bool CSnake::handleEvent(int key){
 	}
 	if(key=='r'){
 		reset_game();
-		stan=RESUME;
+		stan=RESTART;
 		return true;
 	} 
-	if(stan==RESUME){
-		if(key==KEY_UP && direction.y==0){
+	if(stan==RESTART || stan==RESUME){
+		if(key==KEY_UP && direction.y!=1){
 			direction=CPoint(0,-1);
 			return true;
 		}
-		if(key==KEY_DOWN && direction.y==0){
+		if(key==KEY_DOWN && direction.y!=-1){
 			direction=CPoint(0,1);
 			return true;
 		}
-		if(key==KEY_LEFT && direction.x==0){
+		if(key==KEY_LEFT && direction.x!=1){
 			direction=CPoint(-1,0);
 			return true;
 		}
-		if(key==KEY_RIGHT && direction.x==0){
+		if(key==KEY_RIGHT && direction.x!=-1){
 			direction=CPoint(1,0);
 			return true;
 		}
 		
 		if(key==-1){
 			time++;
-			if(time>4){
+			if(time>level){
 				move_snake();
 				time=0;
 				return true;
 			}
 		}
 	}
+
 	return false;
 }
 
 void CSnake::reset_game(){
-	stan=RESUME;
+	stan=RESTART;
 	snake.clear();
 	snake.push_back(CPoint(5,5));
 	snake.push_back(CPoint(4,5));
@@ -101,9 +141,14 @@ void CSnake::reset_game(){
 	direction = CPoint(1,0);
 	place_food();
 	points = 0;
+	level = NumberOfLevels;
 	
 	
 }
+void CSnake::game_over(){
+	stan=END;
+}
+
 void CSnake::place_food(){
 	int height_size=geom.size.y - 2;
 	int width_size=geom.size.x - 2;
@@ -129,22 +174,29 @@ void CSnake::move_snake(){
 	CPoint position = snake[0];
 	position.x += direction.x;
 	position.y +=direction.y;
-	
+	 
 	int height_size=geom.size.y - 2;
 	int width_size=geom.size.x - 2;
+	for(size_t i=0;i<snake.size()-1;i++){
+		if(position.x==snake[i].x && position.y==snake[i].y){
+			game_over();
+			return;
+		}
+	}
 	
-	if(position.x<1){ position.x = width_size; }
-	else if (position.x > width_size){ position.x = 1; }
-	if(position.y<1){ position.y = height_size; }
-	else if (position.y > height_size){ position.y = 1; }
+	if(position.x<1){ position.x = width_size-1; }
+	else if (position.x > width_size){ position.x = 0; }
+	if(position.y<1){ position.y = height_size-1; }
+	else if (position.y > height_size){ position.y = 0; }
 	
 	if(position.x==food.x && position.y==food.y){
 		snake.insert(snake.begin(),position);
 		points++;
 		place_food();
-		snake.push_back('*');
+		if(points%3==0) level--;
 	} else{
 		snake.insert(snake.begin(),position);
 		snake.pop_back(); //do usuniecia
 	}
 }
+

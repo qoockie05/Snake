@@ -31,7 +31,7 @@ void CSnake::paint(){
 				gotoyx(y+snake[i].y,x+snake[i].x);
 				printc('+');
 			}
-		gotoyx(y,x+1);
+		gotoyx(y-1,x+1);
 		printl("LEVEL: %d",NumberOfLevels-level);
 		gotoyx(y+7,x+15);
 		printl("PAUSED");
@@ -39,10 +39,8 @@ void CSnake::paint(){
 		printl("To resume enter: p");
 		
 	} else if(stan==RESTART){
-		gotoyx(y,x+1);
+		gotoyx(y-1,x+1);
 		printl("LEVEL: %d",NumberOfLevels-level);
-		
-		
 		gotoyx(y+snake[0].y,x+snake[0].x);
 		printc('*');
 		for(size_t i=1;i < snake.size();i++){
@@ -60,12 +58,12 @@ void CSnake::paint(){
 				printc('+');
 			}
 			
-			gotoyx(y+1,x);
+			gotoyx(y,x);
 			printl("GAME OVER");
-			gotoyx(y+2,x);
+			gotoyx(y+1,x);
 			printl("POINTS: %d",points);
 	} else if(stan==RESUME){
-			gotoyx(y,x+1);
+			gotoyx(y-1,x+1);
 			printl("LEVEL: %d",NumberOfLevels-level);
 			gotoyx(y+snake[0].y,x+snake[0].x);
 			printc('*');
@@ -175,28 +173,29 @@ void CSnake::move_snake(){
 	position.x += direction.x;
 	position.y +=direction.y;
 	 
-	int height_size=geom.size.y - 2;
-	int width_size=geom.size.x - 2;
-	for(size_t i=0;i<snake.size()-1;i++){
+	int height_size=geom.size.y - 3;
+	int width_size=geom.size.x - 3;
+	for(size_t i=0;i<snake.size();i++){
 		if(position.x==snake[i].x && position.y==snake[i].y){
 			game_over();
 			return;
 		}
 	}
 	
-	if(position.x<1){ position.x = width_size-1; }
-	else if (position.x > width_size){ position.x = 0; }
-	if(position.y<1){ position.y = height_size-1; }
-	else if (position.y > height_size){ position.y = 0; }
-	
+	if(position.x < 0) position.x = width_size;
+	else if(position.x > width_size) position.x = 1;
+
+    if(position.y < 0) position.y = height_size;
+    else if(position.y > height_size) position.y = 1;
+    
 	if(position.x==food.x && position.y==food.y){
 		snake.insert(snake.begin(),position);
 		points++;
 		place_food();
-		if(points%3==0) level--;
+		if(points%3==0 && level>1) level--;
 	} else{
 		snake.insert(snake.begin(),position);
-		snake.pop_back(); //do usuniecia
+		snake.pop_back();
 	}
 }
 

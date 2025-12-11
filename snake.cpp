@@ -89,6 +89,11 @@ bool CSnake::handleEvent(int key){
 		stan=PAUSE;
 		return true;
 	}
+	if(key=='h' && stan==HELP){
+		reset_game();
+		stan=RESTART;
+		return true;
+	}
 	if(key=='h'){
 		stan=HELP;
 		return true;
@@ -98,6 +103,9 @@ bool CSnake::handleEvent(int key){
 		stan=RESTART;
 		return true;
 	} 
+	if(key=='q'){
+		exit(0);
+	}
 	if(stan==RESTART || stan==RESUME){
 		if(key==KEY_UP && direction.y!=1){
 			direction=CPoint(0,-1);
@@ -155,8 +163,8 @@ void CSnake::place_food(){
 	is_end=false;
 	while(!is_end){
 		is_end=true;
-		food.x=(rand() % width_size) + 1;
-		food.y=(rand() % height_size) + 1;
+		food.x=(rand() % width_size-1) + 1;
+		food.y=(rand() % height_size-1) + 1;
 		
 		for(size_t i=0;i < snake.size();i++){
 			if(snake[i].x==food.x && snake[i].y==food.y){
@@ -175,7 +183,7 @@ void CSnake::move_snake(){
 	 
 	int height_size=geom.size.y - 3;
 	int width_size=geom.size.x - 3;
-	for(size_t i=0;i<snake.size();i++){
+	for(size_t i=1;i<snake.size()-2;i++){
 		if(position.x==snake[i].x && position.y==snake[i].y){
 			game_over();
 			return;

@@ -22,6 +22,8 @@ void CSnake::paint(){
 		gotoyx(y+3,x);
 		printl("h - hide instructions");
 		gotoyx(y+4,x);
+		printl("q - quit game");
+		gotoyx(y+5,x);
 		printl("Arrows: move snake with arrows.");
 	} else if(stan==PAUSE){
 		

@@ -26,19 +26,32 @@ Run the game with:
 
 ## **Features**
 -Help screen with controls
+
 -Pause and resume
+
 -Restart option
+
 -Snake movement using arrow keys
+
 -Wall wrapping from one side of the board to the other
+
 -Random food generation
+
 -Snake growth after eating food
+
 -Level progression and increasing speed
+
 -Game over screen with points
+
 
 ## **Controls**
 r - restart game
+
 p - pause / resume
+
 h - show / hide help
+
 q - quit game
+
 
 Arrow keys - move the snake
